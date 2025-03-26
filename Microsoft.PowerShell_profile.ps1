@@ -438,6 +438,70 @@ function flushdns {
 	Write-Host "DNS has been flushed"
 }
 
+# Networking Utilities
+function internetreset {
+	ipconfig /release ; ipconfig /flushdns ; ipconfig /renew
+	Write-Host "Internet Interface has been reseted"
+}
+
+function NetConnectionInfo {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Target
+    )
+    
+    # Ping the target
+    $pingResult = Test-Connection -ComputerName $Target -Count 4 -ErrorAction SilentlyContinue
+
+    if ($pingResult) {
+        Write-Output "Ping to $Target successful:"
+        $pingResult | Format-Table -AutoSize
+    } else {
+        Write-Output "Ping to $Target failed."
+        return
+    }
+    
+    # If the target is a URL, resolve domain information
+    if ($Target -match "^[a-zA-Z]+://") {
+        # Extract the hostname from the URL
+        $url = [System.Uri]$Target
+        $hostname = $url.Host
+    } else {
+        $hostname = $Target
+    }
+
+    try {
+        $dnsInfo = Resolve-DnsName -Name $hostname -ErrorAction Stop
+        Write-Output "`nDomain Information for '$hostname':"
+        $dnsInfo | Format-Table -AutoSize
+    } catch {
+        Write-Output "Failed to retrieve domain information for $hostname."
+    }
+}
+
+
+# Open SSH BuffonPc
+function buffonpc {
+	Write-Host "Oppening SSH Connection to BuffonPc"
+    ssh pedrobuffon@pc.buffon.local
+}
+
+# Open SSH BuffonPc
+function buffonpi {
+	Write-Host "Oppening SSH Connection to BuffonPc"
+    ssh pedrobuffon@pi.buffon.local
+}
+
+# Convert WebP to Jpeg
+function convertWebp {
+    foreach ($file in Get-ChildItem *.webp) {
+        ffmpeg -hide_banner -loglevel error -i $file.FullName -q:v 1 "$($file.BaseName).jpg"
+        if ($?) { 
+        echo $file.FullName" converted"
+        Remove-Item $file.FullName }
+    }
+}
+
 # Clipboard Utilities
 function cpy { Set-Clipboard $args[0] }
 
@@ -632,6 +696,10 @@ $($PSStyle.Foreground.Green)lazyg$($PSStyle.Reset) <message> - Adds all changes,
 $($PSStyle.Foreground.Green)sysinfo$($PSStyle.Reset) - Displays detailed system information.
 
 $($PSStyle.Foreground.Green)flushdns$($PSStyle.Reset) - Clears the DNS cache.
+
+$($PSStyle.Foreground.Green)internetreset$($PSStyle.Reset) - Resets the internet interface by releasing, flushing DNS, and renewing IP configuration.
+
+$($PSStyle.Foreground.Green)etConnectionInfo <target>$($PSStyle.Reset) - Retrieves network connection information for the specified target (hostname or URL).
 
 $($PSStyle.Foreground.Green)cpy$($PSStyle.Reset) <text> - Copies the specified text to the clipboard.
 
