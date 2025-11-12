@@ -4,7 +4,7 @@
 $debug = $false
 
 # Define the path to the file that stores the last execution time
-$timeFilePath = "D:\Documents\PowerShell\LastExecutionTime.txt"
+$timeFilePath = "C:\Users\Pedro Buffon\Documents\PowerShell\LastExecutionTime.txt"
 
 # Define the update interval in days, set to -1 to always check
 $updateInterval = 7
